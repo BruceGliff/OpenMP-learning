@@ -10,7 +10,6 @@ all:	${PROGRAM}.out
 
 ${PROGRAM}.out: ${PROGRAM}.o
 	${LD} ${LDFLAGS} $< -o ${OUT}.out
-	./${OUT}.out
 
 ${PROGRAM}.o: ${PROGRAM}.c
 	${CC} ${CFLAGS} -c $< -o ${PROGRAM}.o
@@ -19,4 +18,4 @@ launch:
 	./${OUT}.out
 
 clean:
-	rm -f ${PROGRAM}.o ${OUT}.out
+	rm -f *.o *.out
