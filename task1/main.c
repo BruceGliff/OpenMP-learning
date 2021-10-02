@@ -18,6 +18,8 @@ int main(int argc, char *argv[]) {
 
     char exit = 0;
     do {
+      // The first arrived thread locks.
+      // Then checks if it is appropreate to be printed.
       omp_set_lock(&lock);
       if (next_to_print == tid) {
         printf("%d\n", tid);
