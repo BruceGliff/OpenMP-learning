@@ -1,4 +1,4 @@
-Task this \*!
+Task this *!
 Prints tid of threads in reverse order.
 To build: make
 To launch: ./run.sh
