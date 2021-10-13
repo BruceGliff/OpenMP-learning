@@ -2,27 +2,30 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SIZE 12
+#define SIZE 100000
 
 void FillArray(float* a);
 void LinearCalc(float *a);
 void Out(float *a);
 
 int main() {
-
   float *a = (float*) malloc (sizeof(float) * SIZE);
   FillArray(a);
+  // Calc an array to compare
   float *linear_a = (float*) malloc (sizeof(float) * SIZE);
   memcpy(linear_a, a, sizeof(float) * SIZE);
-  Out(linear_a);
   LinearCalc(linear_a);
   
-  int tid_to_process = 0;
+  // Preparation to chunk calculation
   int const max = omp_get_max_threads();
   int const chunk_tmp = SIZE / max;
   int const chunk_overhead = SIZE % max;
 
-  if (SIZE <= max * 3 && 0) {
+  omp_lock_t lock;
+  omp_init_lock(&lock);
+
+  // When parallal calculation is useless
+  if (SIZE <= max * 3) {
     LinearCalc(a);
     Out(a);
     return 0;
@@ -46,52 +49,32 @@ int main() {
         a[i] *= a[i+1] / 3;
       else {
         // wait till a[i-1] calculated
-        while(available_tid != tid);
-        #pragma omp critical (GetPrev)
-        {
-          float prev = a[i-1];
-          a[i] *= a[i+1] * prev / 3;
-        }
+        char exit = 0;
+        do {
+          // Wait till a[i-1] is calculated
+          omp_set_lock(&lock);
+          if (available_tid == tid) {
+            float prev = a[i-1];
+            a[i] *= a[i+1] * prev / 3;
+            exit = 1;
+          }
+          omp_unset_lock(&lock);
+        } while (!exit);
       }
     else if (i == end)
       if (tid == max - 1)
         a[i] *= a[i-1] / 3;
       else {
-        #pragma omp critical (GetNext)
-        {
           float next = a[i+1];
           a[i] *= a[i-1] * next / 3;
           available_tid = tid + 1;
-        }
       }
     else {
       a[i] *= a[i+1] * a[i-1] / 3;
     }
   }
 
-  Out(a);
-  Out(linear_a);
-
-  // float elm = 1.f;
-  // int idx_to_inc = chunk_overhead;
-  // for (int i = 0; i != SIZE; ++i) {
-  //   int const inc = idx_to_inc ? 1 : 0;
-  //   int const chunk_sz = chunk_tmp + inc;
-  //   int const tid = inc ? i / chunk_sz  : (i - chunk_overhead) / chunk_sz;
-  //   int const begin = inc ? tid * chunk_sz : tid * chunk_sz + chunk_overhead;
-  //   int const end = begin + chunk_sz - 1;
-
-  //   if (i == begin)
-  //     elm = i == 0 ? 1.f : a[i-1];
-  //   if (i == end)
-  //     a[i] *= a[i+1];
-  //   a[i] *= elm;
-
-    
-  //   if (i == end)
-  //     idx_to_inc = idx_to_inc ? --idx_to_inc : 0;
-  // }
-
+  // Comparation
   for (int i = 0; i != SIZE; ++i)
     if (a[i] != linear_a[i]) {
       printf("Missmatching on pos: %d. expected [%f], gotted [%f]\n", i, linear_a[i], a[i]);
@@ -99,13 +82,15 @@ int main() {
     }
 
   Out(a);
-
+  omp_destroy_lock(&lock);
+  free(a);
+  free(linear_a);
+  return 0;
 }
-
 
 void FillArray(float* a) {
   for (int i = 0; i != SIZE; ++i)
-    a[i] = (float) i+1;
+    a[i] = (float)i+1;
 }
 
 void LinearCalc(float * a) {
