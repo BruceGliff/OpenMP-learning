@@ -11,7 +11,7 @@ void Out(float *a);
 int main() {
 
   float *a = (float*) malloc (sizeof(float) * SIZE);
-  Fillaay(a);
+  FillArray(a);
   float *linear_a = (float*) malloc (sizeof(float) * SIZE);
   memcpy(linear_a, a, sizeof(float) * SIZE);
   Out(linear_a);
