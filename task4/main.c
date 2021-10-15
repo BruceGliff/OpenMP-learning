@@ -90,20 +90,51 @@ int main(int argc, char *argv[]) {
 
   double Begin = omp_get_wtime();
 
+  int MaxHeight = 0;
+  int MaxWidth = 0;
+
+  for (int ix = 0; ix != BlockMatrixHeightA; ++ix)
+    for (int iy = 0; iy != BlockMatrixWidthB; ++iy)
+      for (int i = 0; i != BlockMatrixWidthA; ++i) {
+        MaxHeight = MaxHeight > BlockA.m1.dataI[ix][i] ? MaxHeight
+                                                       : BlockA.m1.dataI[ix][i];
+        MaxHeight = MaxHeight > BlockB.m2.dataI[i][iy] ? MaxHeight
+                                                       : BlockB.m2.dataI[i][iy];
+        MaxHeight = MaxHeight > BlockA.m1.dataI[ix][iy]
+                        ? MaxHeight
+                        : BlockA.m1.dataI[ix][iy];
+
+        MaxWidth = MaxWidth > BlockA.m2.dataI[ix][i] ? MaxWidth
+                                                     : BlockA.m2.dataI[ix][i];
+        MaxWidth = MaxWidth > BlockB.m1.dataI[i][iy] ? MaxWidth
+                                                     : BlockB.m1.dataI[i][iy];
+        MaxWidth = MaxWidth > BlockB.m2.dataI[ix][iy] ? MaxWidth
+                                                      : BlockB.m2.dataI[ix][iy];
+      }
+
+  // Preallocates memory for blocks to avoid realocations in main loop.
+  // Little memory overhead in some cases.
+  Matrix BlockMatrixARawMem = {MaxHeight, MaxWidth};
+  Matrix BlockMatrixBRawMem = {MaxHeight, MaxWidth};
+  Matrix BlockMatrixCRawMem = {MaxHeight, MaxWidth};
+  create_matrix(&BlockMatrixARawMem);
+  create_matrix(&BlockMatrixBRawMem);
+  create_matrix(&BlockMatrixCRawMem);
+
   // Main loop
   for (int ix = 0; ix != BlockMatrixHeightA; ++ix)
     for (int iy = 0; iy != BlockMatrixWidthB; ++iy)
       for (int i = 0; i != BlockMatrixWidthA; ++i) {
 
         Matrix BlockMatrixA = {BlockA.m1.dataI[ix][i], BlockA.m2.dataI[ix][i]};
-        create_matrix(&BlockMatrixA);
+        BlockMatrixA.dataI = BlockMatrixARawMem.dataI;
         for (int Ax = 0; Ax != BlockA.m1.dataI[ix][i]; ++Ax)
           for (int Ay = 0; Ay != BlockA.m2.dataI[ix][i]; ++Ay)
             BlockMatrixA.dataI[Ax][Ay] = A.dataI[Ax + (ix * HeightValueBlockA)]
                                                 [Ay + (i * WidthValueBlockA)];
 
         Matrix BlockMatrixB = {BlockB.m2.dataI[i][iy], BlockB.m1.dataI[i][iy]};
-        create_matrix(&BlockMatrixB);
+        BlockMatrixB.dataI = BlockMatrixBRawMem.dataI;
         for (int Bx = 0; Bx != BlockB.m1.dataI[i][iy]; ++Bx)
           for (int By = 0; By != BlockB.m2.dataI[i][iy]; ++By)
             BlockMatrixB.dataI[By][Bx] = B.dataI[Bx + (i * HeightValueBlockB)]
@@ -111,7 +142,7 @@ int main(int argc, char *argv[]) {
 
         Matrix BlockMatrixC = {BlockA.m1.dataI[ix][iy],
                                BlockB.m2.dataI[ix][iy]};
-        create_matrix(&BlockMatrixC);
+        BlockMatrixC.dataI = BlockMatrixCRawMem.dataI;
         fill_with_zero(&BlockMatrixC);
 
         matrix_multiply(&BlockMatrixA, &BlockMatrixB, &BlockMatrixC);
@@ -120,10 +151,6 @@ int main(int argc, char *argv[]) {
           for (int Cy = 0; Cy < BlockB.m2.dataI[ix][iy]; ++Cy)
             C.dataF[Cx + (ix * HeightValueBlockA)]
                    [Cy + (iy * WidthValueBlockB)] += BlockMatrixC.dataF[Cx][Cy];
-
-        delete_matrix(&BlockMatrixA);
-        delete_matrix(&BlockMatrixB);
-        delete_matrix(&BlockMatrixC);
       }
 
   double End = omp_get_wtime();
@@ -134,6 +161,9 @@ int main(int argc, char *argv[]) {
   delete_matrix(&BlockA.m2);
   delete_matrix(&BlockB.m1);
   delete_matrix(&BlockB.m2);
+  delete_matrix(&BlockMatrixARawMem);
+  delete_matrix(&BlockMatrixBRawMem);
+  delete_matrix(&BlockMatrixCRawMem);
 
   // If there is any argument
   if (argc > 1) {
