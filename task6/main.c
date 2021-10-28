@@ -8,7 +8,7 @@ int main (int argc, char *argv[]) {
     printf("N does not stated!\n");
     return -1;
   }
-  unsigned long long const N = atoll(argv[1]);
+  int const N = atoll(argv[1]);
   switch (N)
   {
   case 0:
@@ -19,7 +19,7 @@ int main (int argc, char *argv[]) {
     printf("1\n");
     return 0;  
   }
-  unsigned long long banned = 2;
+  int banned = 2;
   char * IsPrime = (char*) malloc(N);
   if (!IsPrime) {
     perror("malloc fails");
