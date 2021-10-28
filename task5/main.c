@@ -21,16 +21,15 @@ int main (int argc, char *argv[]) {
 }
 
 double run(unsigned long long n) {
-  double const h = 1.0 / (double) (2 * n);
   double res = 0.0;
   double loc_res = 0.0;
   double prev = 0.0;
 
 // Calculation PI vai series.
-#pragma omp parallel shared (h, n) private (prev)
+#pragma omp parallel private (prev)
 #pragma omp for reduction (+: loc_res)
   for (unsigned long long i = 1; i <= n; ++i) {
-    prev = h * (double) (2 * i - 1);
+    prev = (double) (2 * i - 1) / (double) (2  * n);
     loc_res = loc_res + 1.0 / ( 1.0 + prev * prev );
   }
   res = 4.0 * loc_res / (double) n;
