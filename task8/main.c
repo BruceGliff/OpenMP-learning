@@ -42,8 +42,12 @@ int main(int argc, char *argv[]) {
     print(arr, Size);
     return -1;
   }
+  // pre-check if array already has been sorted:
+  // O(N)
   if (checkForSorted(arr, Size))
     return -1;
+  // pre-check if array a;ready has been sorted
+  // in different order: O(N)
   if (checkForReverseSorted(arr, Size))
     return -1;
 
@@ -65,10 +69,12 @@ void swap(int *x, int *y) {
 int division(int *arr, int l, int r) {
   int pivot = arr[r];
   int idx = (l - 1);
+  // moving elements according to pivot value.
   for (int i = l; i != r; ++i)
     if (arr[i] <= pivot)
       swap(&arr[++idx], &arr[i]);
   swap(&arr[++idx], &arr[r]);
+  // returns index of new pivot
   return idx;
 }
 
