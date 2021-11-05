@@ -19,13 +19,13 @@ int main (int argc, char *argv[]) {
     printf("1\n");
     return 0;  
   }
-  int banned = 2;
-  char * IsPrime = (char*) malloc(N);
+  int banned = 1;
+  char * IsPrime = (char*) malloc(N+1);
   if (!IsPrime) {
     perror("malloc fails");
     return -1;
   }
-  memset(IsPrime, 1, N);
+  memset(IsPrime, 1, N+1);
   IsPrime[1]=0;
   for(int i = 2; i * i <= N; ++i)
     // for i = 2: 
@@ -38,7 +38,8 @@ int main (int argc, char *argv[]) {
         ++banned;
         IsPrime[j] = 0;
       }
-  printf("%llu\n", N - banned);
+
+  printf("%d\n", N - banned);
   free(IsPrime);
   return 0;
 }
