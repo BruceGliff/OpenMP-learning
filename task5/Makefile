@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -g -O2 -fopenmp
 LD = clang
-LDFLAGS = -g -fopenmp
+LDFLAGS = -g -fopenmp -lm
 
 PROGRAM = main
 
