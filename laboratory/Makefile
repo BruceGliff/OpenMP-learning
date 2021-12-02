@@ -8,6 +8,7 @@ all : ${OUT} linear_common linear_my parallel_common parallel_my
 
 ${OUT} :
 	@mkdir -p ${OUT}
+	@cp launch.sh plot.py ${OUT}
 
 linear_common : 
 	-gcc ${CFLAGS} ${SRC}/$@.c -o ${OUT}/$@.out ${LFLAGS}
