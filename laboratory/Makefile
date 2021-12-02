@@ -1,5 +1,5 @@
 
-CFLAGS := 
+CFLAGS := -std=c99
 LFLAGS := -lm
 SRC := src
 OUT := output
