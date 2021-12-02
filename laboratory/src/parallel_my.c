@@ -32,8 +32,10 @@ void releaseMatrix(matrix m) {
 }
 
 void print(matrix m) {
-  for (int i = 0; i != m.height; ++i) {
-    for (int j = 0; j != m.width; ++j)
+  int i = 0;
+  int j = 0;
+  for (i = 0; i != m.height; ++i) {
+    for (j = 0; j != m.width; ++j)
       printf("%f ", getVal(m, i, j));
     printf("\n");
   }
@@ -105,8 +107,8 @@ int main(int argc, char **argv) {
                expected, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
     FILE *ff = fopen("result_parallel_my.dat", "w");
-    for (int i = 0; i != a.height; ++i) {
-      for (int j = 0; j != a.width; ++j)
+    for (i = 0; i != a.height; ++i) {
+      for (j = 0; j != a.width; ++j)
         fprintf(ff, "%f ", getVal(a, i, j));
       fprintf(ff, "\n");
     }
