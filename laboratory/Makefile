@@ -6,9 +6,10 @@ OUT := output
 
 all : ${OUT} linear_common linear_my parallel_common parallel_my
 
+.PHONY : ${OUT}
 ${OUT} :
 	@mkdir -p ${OUT}
-	@cp launch.sh plot.py ${OUT}
+	@cp launch.sh plot.py job.sh compare.sh ${OUT}
 
 linear_common : 
 	-gcc ${CFLAGS} ${SRC}/$@.c -o ${OUT}/$@.out ${LFLAGS}

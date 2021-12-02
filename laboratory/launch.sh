@@ -12,12 +12,13 @@ rm timing.dat
 for ((a = 1; a < 13; a++))
 do
 	echo "Threads $a"
-	/usr/bin/time -f "%e %S" -o .tmp.timing mpirun -np $a ./$1
-	echo $a "$(< .tmp.timing)" >> timing.dat
+	
+	start=`date +%s.%N`
+	mpirun -np $a ./$1
+	end=`date +%s.%N`
+	runtime=$(awk '{print $1-$2}' <<<"$end $start")
+	echo $a $runtime >> timing.dat
 done
-
-rm .tmp.timing
-
 
 
 echo "Done."
