@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# launch up to 12 threads.
+# launch up to 12 processes.
 
 if [[ -z $1 ]]; then
   echo "Usage: ./launch {program.out}"
@@ -11,7 +11,7 @@ rm timing.dat
 
 for ((a = 1; a < 13; a++))
 do
-	echo "Threads $a"
+	echo "Processes $a"
 	
 	start=`date +%s.%N`
 	mpirun -np $a ./$1

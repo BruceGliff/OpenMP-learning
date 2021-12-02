@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   // There is the separation on proc_num tasks.
   int const chunk_tmp = ISIZE / proc_num;
   int const chunk_overhead = ISIZE % proc_num;
-  int const th_count = ISIZE > proc_num ? proc_num : ISIZE;
+  int const proc_count = ISIZE > proc_num ? proc_num : ISIZE;
   int const inc = chunk_overhead - rank > 0 ? 1 : 0;
   int const chunk_sz = chunk_tmp + inc;
   int const begin = inc ? rank * chunk_sz : rank * chunk_sz + chunk_overhead;
@@ -104,11 +104,11 @@ int main(int argc, char **argv) {
   }
   releaseMatrix(small);
 
-  // Main thread do results collecting and printing.
+  // Main process do results collecting and printing.
   if (!rank) {
     int expected = 0;
     // Recieving all calculated data from other processes.
-    while (++expected != th_count) {
+    while (++expected != proc_count) {
       // Recalculating chunks of revieved packets.
       int const chunk_overhead = ISIZE % proc_num;
       int const e_inc = chunk_overhead - expected > 0 ? 1 : 0;
